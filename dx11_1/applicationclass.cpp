@@ -6,6 +6,7 @@
 ApplicationClass::ApplicationClass() 
 {
     m_Direct3D = 0; // 안전을 위해 null로 초기화
+    // 
 }
 ApplicationClass::ApplicationClass(const ApplicationClass& other) 
 {
