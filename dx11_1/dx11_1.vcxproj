@@ -123,12 +123,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Applicationclass.h" />
+    <ClInclude Include="applicationclass.h" />
+    <ClInclude Include="d3dclass.h" />
     <ClInclude Include="dx11_1.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Inputclass.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Systemclass.h" />
+    <ClInclude Include="inputclass.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="systemclass.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp" />
+    <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="systemclass.cpp" />

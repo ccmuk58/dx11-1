@@ -5,7 +5,7 @@
 #ifndef _APPLICATIONCLASS_H_
 #define _APPLICATIONCLASS_H_
 
-#include <windows.h>
+#include "d3dclass.h"
 
 // 그래픽 전역 설정
 const bool  FULL_SCREEN = false;   // true: 전체화면 / false: 800x600 창 모드
@@ -29,7 +29,7 @@ private:
 
     // Tutorial 3부터 Direct3D 객체들이 여기에 추가됩니다.
 private:
-    //D3DClass* m_Direct3D;
+    D3DClass* m_Direct3D;
 };
 
 #endif
