@@ -1,0 +1,2 @@
+GPU 이름: NVIDIA GeForce RTX 3080 Ti
+GPU 메모리: 12086 MB
