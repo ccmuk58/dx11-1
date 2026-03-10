@@ -123,10 +123,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ApplicationClass.h" />
+    <ClInclude Include="D3DClass.h" />
     <ClInclude Include="dx11_1.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="System.h" />
+    <ClInclude Include="SystemClass.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -137,7 +139,11 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ApplicationClass.cpp" />
+    <ClCompile Include="D3DClass.cpp" />
+    <ClCompile Include="Inputclass.cpp" />
+    <ClCompile Include="InputClass.h" />
+    <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="System.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
