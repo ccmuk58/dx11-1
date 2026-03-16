@@ -7,16 +7,22 @@ ModelClass::ModelClass()
 {
     m_vertexBuffer = 0;
     m_indexBuffer = 0;
+    m_Texture = 0; // 새로 추가
 }
 
 ModelClass::ModelClass(const ModelClass& other) {}
 ModelClass::~ModelClass() {}
 
-bool ModelClass::Initialize(ID3D11Device* device)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+    char* textureFilename)
 {
     bool result;
 
     result = InitializeBuffers(device);
+    if (!result) { return false; }
+
+    // 텍스처를 로드합니다. (새로 추가)
+    result = LoadTexture(device, deviceContext, textureFilename);
     if (!result) { return false; }
 
     return true;
@@ -24,10 +30,12 @@ bool ModelClass::Initialize(ID3D11Device* device)
 
 void ModelClass::Shutdown()
 {
+    ReleaseTexture(); // 텍스처 해제 (새로 추가)
     ShutdownBuffers();
     return;
 }
 
+// 텍스처 셰이더가 사용할 텍스처 리소스를 반환합니다.
 void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 {
     RenderBuffers(deviceContext);
@@ -37,6 +45,10 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 int ModelClass::GetIndexCount()
 {
     return m_indexCount;
+}
+ID3D11ShaderResourceView* ModelClass::GetTexture()
+{
+    return m_Texture->GetTexture();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
@@ -53,29 +65,26 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
     // 임시 버텍스 배열을 생성합니다.
     vertices = new VertexType[m_vertexCount];
-    if (!vertices) { return false; }
 
     // 임시 인덱스 배열을 생성합니다.
     indices = new unsigned long[m_indexCount];
-    if (!indices) { return false; }
 
-    // 삼각형의 버텍스 데이터를 시계 방향으로 로드합니다.
-    // 반시계 방향으로 입력하면 백페이스 컬링에 의해 보이지 않습니다.
+    // 버텍스 데이터를 설정합니다. 색상 대신 텍스처 좌표(UV)를 사용합니다.
+   // 텍셀 좌표: U는 가로(0=왼쪽, 1=오른쪽), V는 세로(0=위, 1=아래)
     vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); // 왼쪽 아래
-    vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // 초록색
+    vertices[0].texture = XMFLOAT2(0.0f, 1.0f);          // U 0.0, V 1.0
 
     vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // 위쪽 가운데
-    vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[1].texture = XMFLOAT2(0.5f, 0.0f);          // U 0.5, V 0.0
 
-    vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f); // 오른쪽 아래
-    vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // 오른쪽 아래
+    vertices[2].texture = XMFLOAT2(1.0f, 1.0f);          // U 1.0, V 1.0
 
-    // 인덱스 데이터를 로드합니다.
-    indices[0] = 0; // 왼쪽 아래
-    indices[1] = 1; // 위쪽 가운데
-    indices[2] = 2; // 오른쪽 아래
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
 
-    // 버텍스 버퍼 설명을 설정합니다.
+    // 버텍스 버퍼 설정
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -83,16 +92,14 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     vertexBufferDesc.MiscFlags = 0;
     vertexBufferDesc.StructureByteStride = 0;
 
-    // 버텍스 데이터의 서브리소스 포인터를 설정합니다.
     vertexData.pSysMem = vertices;
     vertexData.SysMemPitch = 0;
     vertexData.SysMemSlicePitch = 0;
 
-    // 버텍스 버퍼를 생성합니다.
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
     if (FAILED(result)) { return false; }
 
-    // 인덱스 버퍼 설명을 설정합니다.
+    // 인덱스 버퍼 설정
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -100,21 +107,15 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     indexBufferDesc.MiscFlags = 0;
     indexBufferDesc.StructureByteStride = 0;
 
-    // 인덱스 데이터의 서브리소스 포인터를 설정합니다.
     indexData.pSysMem = indices;
     indexData.SysMemPitch = 0;
     indexData.SysMemSlicePitch = 0;
 
-    // 인덱스 버퍼를 생성합니다.
     result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
     if (FAILED(result)) { return false; }
 
-    // 버퍼에 데이터가 복사됐으므로 임시 배열을 해제합니다.
-    delete[] vertices;
-    vertices = 0;
-
-    delete[] indices;
-    indices = 0;
+    delete[] vertices; vertices = 0;
+    delete[] indices;  indices = 0;
 
     return true;
 }
@@ -128,20 +129,41 @@ void ModelClass::ShutdownBuffers()
 
 void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
-    unsigned int stride;
-    unsigned int offset;
-
-    stride = sizeof(VertexType);
-    offset = 0;
+    unsigned int stride = sizeof(VertexType);
+    unsigned int offset = 0;
 
     // 버텍스 버퍼를 입력 어셈블러에 활성화합니다.
     deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
     // 인덱스 버퍼를 입력 어셈블러에 활성화합니다.
     deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
     // 삼각형 리스트로 그리도록 설정합니다.
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+    return;
+}
+
+// 텍스처 객체를 생성하고 초기화합니다.
+bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+    char* filename)
+{
+    bool result;
+
+    m_Texture = new TextureClass;
+
+    result = m_Texture->Initialize(device, deviceContext, filename);
+    if (!result) { return false; }
+
+    return true;
+}
+
+// 텍스처 객체를 해제합니다.
+void ModelClass::ReleaseTexture()
+{
+    if (m_Texture)
+    {
+        m_Texture->Shutdown();
+        delete m_Texture;
+        m_Texture = 0;
+    }
     return;
 }

@@ -11,7 +11,7 @@
 #include "D3DClass.h"
 #include "CameraClass.h"
 #include "ModelClass.h"
-#include "ColorShaderClass.h"
+#include "TextureShaderClass.h"
 
 /////////////
 // 전역 상수 //
@@ -39,7 +39,7 @@ private:
     D3DClass* m_Direct3D;  // D3DClass 포인터
     CameraClass* m_Camera;      // 카메라 (새로 추가)
     ModelClass* m_Model;       // 3D 모델 (새로 추가)
-    ColorShaderClass* m_ColorShader; // 컬러 셰이더 (새로 추가)
+    TextureShaderClass* m_TextureShader; // ColorShaderClass -> TextureShaderClass
 };
 
 #endif
