@@ -8,7 +8,10 @@
 ///////////////////////
 // 클래스 헤더 포함   //
 ///////////////////////
-#include "d3dclass.h"
+#include "D3DClass.h"
+#include "CameraClass.h"
+#include "ModelClass.h"
+#include "ColorShaderClass.h"
 
 /////////////
 // 전역 상수 //
@@ -33,7 +36,10 @@ private:
     bool Render();
 
 private:
-    D3DClass* m_Direct3D;  // D3DClass 포인터 (새로 추가)
+    D3DClass* m_Direct3D;  // D3DClass 포인터
+    CameraClass* m_Camera;      // 카메라 (새로 추가)
+    ModelClass* m_Model;       // 3D 모델 (새로 추가)
+    ColorShaderClass* m_ColorShader; // 컬러 셰이더 (새로 추가)
 };
 
 #endif
