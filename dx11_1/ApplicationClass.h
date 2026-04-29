@@ -12,6 +12,8 @@
 #include "CameraClass.h"
 #include "ModelClass.h"
 #include "TextureShaderClass.h"
+#include "LightShaderClass.h"
+#include "LightClass.h"
 
 /////////////
 // 전역 상수 //
@@ -33,13 +35,14 @@ public:
     bool Frame();
 
 private:
-    bool Render();
+    bool Render(float);
 
 private:
     D3DClass* m_Direct3D;  // D3DClass 포인터
     CameraClass* m_Camera;      // 카메라 (새로 추가)
     ModelClass* m_Model;       // 3D 모델 (새로 추가)
-    TextureShaderClass* m_TextureShader; // ColorShaderClass -> TextureShaderClass
+    LightShaderClass* m_LightShader;
+    LightClass* m_Light;
 };
 
 #endif
